@@ -139,26 +139,6 @@ model Review {
   @@map("reviews")
 }
 
-model User {
-  id              String           @id
-  name            String
-  email           String
-  emailVerified   Boolean          @default(false)
-  image           String?
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  role            String?          @default("CUSTOMER")
-  status          String?          @default("ACTIVE")
-  sessions        Session[]
-  accounts        Account[]
-  providerProfile ProviderProfile?
-  orders          Order[]
-  reviews         Review[]
-
-  @@unique([email])
-  @@map("user")
-}
-
 model Session {
   id        String   @id
   expiresAt DateTime
@@ -205,4 +185,24 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+}
+
+model User {
+  id              String           @id
+  name            String
+  email           String
+  emailVerified   Boolean          @default(false)
+  image           String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  role            String?          @default("CUSTOMER")
+  status          String?          @default("ACTIVE")
+  sessions        Session[]
+  accounts        Account[]
+  providerProfile ProviderProfile?
+  orders          Order[]
+  reviews         Review[]
+
+  @@unique([email])
+  @@map("user")
 }
