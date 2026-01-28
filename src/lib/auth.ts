@@ -9,8 +9,8 @@ const transporter = nodemailer.createTransport({
   port: 587,
   secure: false,
   auth: {
-    user: process.env.user,
-    pass: process.env.pass,
+    user: process.env.MAIL_USER,
+    pass: process.env.MAIL_PASS,
   },
 });
 
@@ -19,27 +19,13 @@ export const auth = betterAuth({
     provider: "postgresql",
   }),
 
-  trustedOrigins: [process.env.APP_URl as string],
-
-  user: {
-    additionalFields: {
-      role: {
-        type: "string",
-        defaultValue: "CUSTOMER",
-        required: false,
-      },
-     status: {
-        type: "string",
-        defaultValue: "ACTIVE",
-        required: false,
-      },
-    },
-  },
+  trustedOrigins: ["http://localhost:3000"],
 
   emailAndPassword: {
     enabled: true,
     autoSignIn: false,
     requireEmailVerification: true,
+
   },
 
   emailVerification: {
@@ -47,30 +33,23 @@ export const auth = betterAuth({
     autoSignInAfterVerification: true,
 
     sendVerificationEmail: async ({ user, url }) => {
-      try {
-        await transporter.sendMail({
-          from: `"FoodHub 🍱" <${process.env.user}>`,
-          to: user.email,
-          subject: "Verify your FoodHub email address",
-          text: `Verify your FoodHub account: ${url}`,
-          html: verificationEmailTemplate({
-            name: user.name,
-            verifyUrl: url,
-          }),
-        });
-      } catch (error) {
-        console.error("Email verification error:", error);
-        throw error;
-      }
+      const link = new URL(url);
+      // ✅ Remove this line - don't override the callbackURL
+      // link.searchParams.set("callbackURL", "/auth/verify");
+
+      await transporter.sendMail({
+        from: `"FoodHub 🍱" <${process.env.user}>`,
+        to: user.email,
+        subject: "Verify your FoodHub email address",
+        text: `Verify your FoodHub account: ${url}`,
+        html: verificationEmailTemplate({
+          name: user.name,
+          verifyUrl: String(url), // ✅ Use original url, not link
+        }),
+      });
     },
+    callbackURL: "/auth/verify",
   },
 
-  socialProviders: {
-    google: {
-      clientId: process.env.GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-      accessType: "offline",
-      prompt: "select_account consent",
-    },
-  },
+
 });
