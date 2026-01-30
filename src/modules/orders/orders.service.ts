@@ -71,6 +71,9 @@ export async function createOrderService(req: any) {
 
   return order;
 }
+
+
+
 export async function getMyOrdersService(req: any) {
   const user = await requireUser(req);
 
@@ -94,4 +97,32 @@ export async function getMyOrdersService(req: any) {
       },
     },
   });
+}
+
+
+
+
+
+
+export async function getOrderDetailsService(req: any) {
+  const user = await requireUser(req);
+
+  const order = await prisma.order.findFirst({
+    where: {
+      id: req.params.id,
+      customerId: user.id,
+    },
+    include: {
+      provider: true,
+      items: {
+        include: {
+          meal: true,
+        },
+      },
+    },
+  });
+
+  if (!order) throw new Error("ORDER_NOT_FOUND");
+
+  return order;
 }
