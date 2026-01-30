@@ -1,17 +1,17 @@
-// modules/provider/provider.router.ts
 import { Router } from "express";
-import {
-    getProviderProfile,
-    upsertProviderProfile,
-} from "./provider.controller";
-// import { authMiddleware } from "../auth/auth.middleware";
+import { createCategoryController, deleteCategoryController, listCategoryController, updateCategoryController } from "./category.controller";
+import { applyForProviderController, createMealController, deleteMealController, updateMealController, updateOrderStatusController } from "./provider.controller";
 
 const router = Router();
 
-// router.use(authMiddleware);
 
-router.get("/profile", getProviderProfile);
-router.post("/profile", upsertProviderProfile);
-router.put("/profile", upsertProviderProfile);
+// extra for  managing provider and categories 
+router.post("/apply", applyForProviderController);
+router.post("/categories", createCategoryController);
+router.get("/categories", listCategoryController);
+router.put("/categories/:id", updateCategoryController);
+router.delete("/categories/:id", deleteCategoryController);
 
-export const providerRoutes= router;
+export const providerRoutes = router;
+
+

@@ -1,50 +1,32 @@
 import { Request, Response } from "express";
-import { prisma } from "../../lib/prisma";
+import {
+  applyForProviderService,
+  createMealService,
+  deleteMealService,
+  updateMealService,
+  updateOrderStatusService
+} from "./provider.service";
 
-export const getProviderProfile = async (req: Request, res: Response) => {
-    if (!req.user) {
-        return res.status(401).json({ message: "Unauthorized" });
-    }
+export async function applyForProviderController(req: Request, res: Response) {
+  try {
+    const profile = await applyForProviderService(req);
 
-    if (req.user.role !== "PROVIDER") {
-        return res.status(403).json({ message: "Access denied" });
-    }
-
-    const profile = await prisma.providerProfile.findUnique({
-        where: { userId: req.user.id },
+    return res.status(201).json({
+      success: true,
+      data: profile,
     });
+  } catch (error: any) {
+    const msg = error.message;
 
-    res.json(profile);
-};
-
-export const upsertProviderProfile = async (req: Request, res: Response) => {
-    if (!req.user) {
-        return res.status(401).json({ message: "Unauthorized" });
+    if (msg === "UNAUTHORIZED") {
+      return res.status(401).json({ success: false, message: msg });
     }
 
-    if (req.user.role !== "PROVIDER") {
-        return res.status(403).json({ message: "Only providers allowed" });
+    if (msg === "ALREADY_PROVIDER" || msg === "PROFILE_ALREADY_EXISTS") {
+      return res.status(400).json({ success: false, message: msg });
     }
 
-    const { name, description, address, phone } = req.body;
+    return res.status(500).json({ success: false, message: "Failed to apply" });
+  }
+}
 
-    if (!name || !address) {
-        return res.status(400).json({
-            message: "Name and address are required",
-        });
-    }
-
-    const profile = await prisma.providerProfile.upsert({
-        where: { userId: req.user.id },
-        update: { name, description, address, phone },
-        create: {
-            userId: req.user.id,
-            name,
-            description,
-            address,
-            phone,
-        },
-    });
-
-    res.json(profile);
-};
