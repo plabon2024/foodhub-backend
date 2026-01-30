@@ -59,3 +59,58 @@ export async function getMealDetailsController(
   }
 }
 
+
+export async function listProvidersController(
+  req: Request,
+  res: Response
+) {
+  try {
+    const providers = await listProvidersService();
+
+    return res.json({
+      success: true,
+      data: providers,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch providers",
+    });
+  }
+}
+
+
+export async function getProviderWithMenuController(
+  req: Request,
+  res: Response
+) {
+  try {
+
+    const { id } = req.params;
+
+    if (!id || Array.isArray(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid meal id",
+      });
+    }
+    const provider = await getProviderWithMenuService(id);
+
+    return res.json({
+      success: true,
+      data: provider,
+    });
+  } catch (error: any) {
+    if (error.message === "PROVIDER_NOT_FOUND") {
+      return res.status(404).json({
+        success: false,
+        message: "Provider not found",
+      });
+    }
+
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+}

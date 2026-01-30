@@ -30,7 +30,6 @@ export async function browseMealsService(query: any) {
     where.providerId = providerId;
   }
 
-
   if (minPrice || maxPrice) {
     where.price = {};
     if (minPrice) {
@@ -41,7 +40,7 @@ export async function browseMealsService(query: any) {
     }
   }
 
- 
+  // Handle search query
   if (q) {
     where.name = {
       contains: q,
@@ -69,7 +68,6 @@ export async function browseMealsService(query: any) {
     prisma.meal.count({ where }),
   ]);
 
-  // Return formatted response with pagination info
   return {
     items,
     pagination: {
@@ -118,3 +116,90 @@ export async function getMealDetailsService(mealId: string) {
   return meal;
 }
 
+
+
+export async function listProvidersService() {
+  const providers = await prisma.providerProfile.findMany({
+    where: {
+      isActive: true,
+      user: {
+        status: "ACTIVE",
+      },
+    },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      address: true,
+      phone: true,
+      createdAt: true,
+      user: {
+        select: {
+          image: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return providers;
+}
+
+
+export async function getProviderWithMenuService(providerId: string) {
+  if (!providerId) {
+    throw new Error("PROVIDER_ID_REQUIRED");
+  }
+
+  const provider = await prisma.providerProfile.findFirst({
+    where: {
+      id: providerId,
+      isActive: true,
+      user: {
+        status: "ACTIVE",
+      },
+    },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      address: true,
+      phone: true,
+      createdAt: true,
+      user: {
+        select: {
+          image: true,
+        },
+      },
+      meals: {
+        where: {
+          isAvailable: true,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          price: true,
+          imageUrl: true,
+          category: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!provider) {
+    throw new Error("PROVIDER_NOT_FOUND");
+  }
+
+  return provider;
+}
