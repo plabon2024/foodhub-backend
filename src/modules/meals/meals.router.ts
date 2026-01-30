@@ -1,8 +1,12 @@
-import express, { Request, Response } from 'express';
-import { postController } from './meals.controller';
+import { Router } from "express";
+import { browseMealsController, getMealDetailsController, getProviderWithMenuController, listProvidersController } from "./meals.controller";
 
-const router = express.Router();
+const router = Router();
 
-router.post("/meals", postController.createPost);
+router.get("/meals", browseMealsController);
+router.get("/meals/:id", getMealDetailsController);
 
-export const mealRoute = router;
+
+
+
+export const mealRoutes= router;
