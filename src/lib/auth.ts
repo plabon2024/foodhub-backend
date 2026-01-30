@@ -34,9 +34,7 @@ export const auth = betterAuth({
 
     sendVerificationEmail: async ({ user, url }) => {
       const link = new URL(url);
-      // ✅ Remove this line - don't override the callbackURL
-      // link.searchParams.set("callbackURL", "/auth/verify");
-
+ 
       await transporter.sendMail({
         from: `"FoodHub 🍱" <${process.env.user}>`,
         to: user.email,
