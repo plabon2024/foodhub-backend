@@ -30,3 +30,39 @@ export async function applyForProviderController(req: Request, res: Response) {
   }
 }
 
+
+export async function createMealController(req: Request, res: Response) {
+  try {
+    const meal = await createMealService(req);
+    res.status(201).json({ success: true, data: meal });
+  } catch (e: any) {
+    res.status(400).json({ success: false, message: e.message });
+  }
+}
+
+export async function updateMealController(req: Request, res: Response) {
+  try {
+    await updateMealService(req);
+    res.json({ success: true });
+  } catch (e: any) {
+    res.status(400).json({ success: false, message: e.message });
+  }
+}
+
+export async function deleteMealController(req: Request, res: Response) {
+  try {
+    await deleteMealService(req);
+    res.json({ success: true });
+  } catch (e: any) {
+    res.status(400).json({ success: false, message: e.message });
+  }
+}
+
+export async function updateOrderStatusController(req: Request, res: Response) {
+  try {
+    await updateOrderStatusService(req);
+    res.json({ success: true });
+  } catch (e: any) {
+    res.status(400).json({ success: false, message: e.message });
+  }
+}

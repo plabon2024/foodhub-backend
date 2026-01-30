@@ -5,6 +5,15 @@ import { applyForProviderController, createMealController, deleteMealController,
 const router = Router();
 
 
+
+
+
+router.post("/meals", createMealController);
+router.put("/meals/:id", updateMealController);
+router.delete("/meals/:id", deleteMealController);
+router.patch("/orders/:id", updateOrderStatusController);
+
+
 // extra for  managing provider and categories 
 router.post("/apply", applyForProviderController);
 router.post("/categories", createCategoryController);

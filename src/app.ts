@@ -3,8 +3,8 @@ import express, { Application } from "express";
 
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth";
-import { providerRoutes } from "./modules/provider/provider.router";
 import { authRouter } from "./modules/auth/auth.router";
+import { providerRoutes } from "./modules/provider/provider.router";
 export const app: Application = express();
 app.use(
   cors({
@@ -16,6 +16,7 @@ app.use(
 app.use(express.json());
 app.use("/api/auth", authRouter);
 app.all("/api/auth/*splat", toNodeHandler(auth));
+// Provider Management
 app.use("/api/provider", providerRoutes);
 
 
