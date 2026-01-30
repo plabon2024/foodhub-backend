@@ -23,3 +23,19 @@ export async function getAllUsersService(req: any) {
     },
   });
 }
+
+
+export async function updateUserStatusService(req: any) {
+  await requireAdmin(req);
+
+  const { status } = req.body;
+
+  if (!["ACTIVE", "SUSPENDED"].includes(status)) {
+    throw new Error("INVALID_STATUS");
+  }
+
+  return prisma.user.update({
+    where: { id: req.params.id },
+    data: { status },
+  });
+}
