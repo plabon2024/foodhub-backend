@@ -71,3 +71,27 @@ export async function createOrderService(req: any) {
 
   return order;
 }
+export async function getMyOrdersService(req: any) {
+  const user = await requireUser(req);
+
+  return prisma.order.findMany({
+    where: {
+      customerId: user.id,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    include: {
+      provider: {
+        select: { id: true, name: true },
+      },
+      items: {
+        include: {
+          meal: {
+            select: { id: true, name: true },
+          },
+        },
+      },
+    },
+  });
+}

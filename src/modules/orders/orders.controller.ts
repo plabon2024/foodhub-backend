@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { createOrderService } from "./orders.service";
+import { createOrderService, getMyOrdersService } from "./orders.service";
 
 
 export async function createOrderController(
@@ -15,3 +15,15 @@ export async function createOrderController(
 }
 
 
+
+export async function getMyOrdersController(
+  req: Request,
+  res: Response
+) {
+  try {
+    const orders = await getMyOrdersService(req);
+    res.json({ success: true, data: orders });
+  } catch {
+    res.status(401).json({ success: false, message: "UNAUTHORIZED" });
+  }
+}
