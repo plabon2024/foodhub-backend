@@ -65,7 +65,7 @@ export const auth = betterAuth({
     user: {
       create: {
         before: async (user) => {
-          // ✅ null-safe name splitting
+       
           const [firstName = null, lastName = null] =
             user.name?.split(" ") ?? [];
 

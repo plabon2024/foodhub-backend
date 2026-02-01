@@ -41,7 +41,7 @@ export async function updateUserStatusService(req: any) {
 }
 
 
-// Service
+
 export async function approveProviderApplication(
   req: any,
   applicationId: string
@@ -94,3 +94,5 @@ export async function approveProviderApplication(
 
   return profile;
 }
+
+
