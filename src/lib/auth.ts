@@ -21,11 +21,24 @@ export const auth = betterAuth({
 
   trustedOrigins: ["http://localhost:3000"],
 
+  user: {
+    additionalFields: {
+      role: {
+        type: ["CUSTOMER", "PROVIDER", "ADMIN"],
+        required: true,
+        defaultValue: "CUSTOMER",
+      },
+      status: {
+        type: ["ACTIVE", "SUSPENDED"],
+        defaultValue: "ACTIVE",
+      },
+    },
+  },
+
   emailAndPassword: {
     enabled: true,
     autoSignIn: false,
     requireEmailVerification: true,
-
   },
 
   emailVerification: {
@@ -33,21 +46,51 @@ export const auth = betterAuth({
     autoSignInAfterVerification: true,
 
     sendVerificationEmail: async ({ user, url }) => {
-      const link = new URL(url);
- 
       await transporter.sendMail({
-        from: `"FoodHub 🍱" <${process.env.user}>`,
+        from: `"FoodHub 🍱" <${process.env.MAIL_USER}>`,
         to: user.email,
         subject: "Verify your FoodHub email address",
         text: `Verify your FoodHub account: ${url}`,
         html: verificationEmailTemplate({
-          name: user.name,
-          verifyUrl: String(url), // ✅ Use original url, not link
+          name: user.name ?? "there",
+          verifyUrl: url,
         }),
       });
     },
+
     callbackURL: "/auth/verify",
   },
 
+  databaseHooks: {
+    user: {
+      create: {
+        before: async (user) => {
+          // ✅ null-safe name splitting
+          const [firstName = null, lastName = null] =
+            user.name?.split(" ") ?? [];
 
+          return {
+            data: {
+              ...user,
+              firstName,
+              lastName,
+            },
+          };
+        },
+
+        after: async (user) => {
+
+          if (user.role !== "PROVIDER") return;
+          await prisma.providerProfile.upsert({
+            where: { userId: user.id },
+            create: {
+              userId: user.id,
+              name: user.name ?? "",
+            },
+            update: {},
+          });
+        },
+      },
+    },
+  },
 });

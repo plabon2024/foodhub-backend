@@ -24,8 +24,6 @@ enum UserStatus {
   SUSPENDED
 }
 
-
-
 enum OrderStatus {
   PLACED
   PREPARING
@@ -33,11 +31,13 @@ enum OrderStatus {
   DELIVERED
   CANCELLED
 }
+
 enum ProviderApplicationStatus {
   PENDING
   APPROVED
   REJECTED
 }
+
 model ProviderApplication {
   id        String                    @id @default(uuid())
   userId    String                    @unique
