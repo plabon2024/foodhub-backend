@@ -39,3 +39,58 @@ export async function updateUserStatusService(req: any) {
     data: { status },
   });
 }
+
+
+// Service
+export async function approveProviderApplication(
+  req: any,
+  applicationId: string
+) {
+  await requireAdmin(req);
+
+  const application = await prisma.providerApplication.findUnique({
+    where: { id: applicationId },
+    include: { user: true },
+  });
+
+  if (!application) {
+    throw new Error("APPLICATION_NOT_FOUND");
+  }
+
+  if (application.status !== "PENDING") {
+    throw new Error("APPLICATION_ALREADY_PROCESSED");
+  }
+
+  if (!application.user) {
+    throw new Error("INVALID_APPLICATION");
+  }
+
+  if (!application.user.name) {
+    throw new Error("INVALID_USER_DATA");
+  }
+
+  const [, , profile] = await prisma.$transaction([
+    prisma.providerApplication.update({
+      where: { id: applicationId },
+      data: { 
+        status: "APPROVED"
+      },
+    }),
+    prisma.user.update({
+      where: { id: application.userId },
+      data: { role: "PROVIDER" },
+    }),
+    prisma.providerProfile.create({
+      data: {
+        userId: application.userId,
+        name: application.user.name,
+        description: null, 
+        address: null,    
+        phone: null,      
+        isActive: true,
+      },
+    }),
+  ]);
+
+  return profile;
+}

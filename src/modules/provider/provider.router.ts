@@ -4,10 +4,6 @@ import { applyForProviderController, createMealController, deleteMealController,
 
 const router = Router();
 
-
-
-
-
 router.post("/meals", createMealController);
 router.put("/meals/:id", updateMealController);
 router.delete("/meals/:id", deleteMealController);

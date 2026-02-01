@@ -6,23 +6,29 @@ import {
   updateMealService,
   updateOrderStatusService
 } from "./provider.service";
+import { requireUser } from "../../lib/auth-user";
 
-export async function applyForProviderController(req: Request, res: Response) {
+export async function applyForProviderController(
+  req: Request,
+  res: Response
+) {
   try {
-    const profile = await applyForProviderService(req);
+    const user = await requireUser(req);
+
+    const application = await applyForProviderService(user.id);
 
     return res.status(201).json({
       success: true,
-      data: profile,
+      data: application,
     });
   } catch (error: any) {
     const msg = error.message;
 
-    if (msg === "UNAUTHORIZED") {
-      return res.status(401).json({ success: false, message: msg });
-    }
-
-    if (msg === "ALREADY_PROVIDER" || msg === "PROFILE_ALREADY_EXISTS") {
+    if (
+      msg === "UNAUTHORIZED" ||
+      msg === "ALREADY_PROVIDER" ||
+      msg === "APPLICATION_ALREADY_EXISTS"
+    ) {
       return res.status(400).json({ success: false, message: msg });
     }
 

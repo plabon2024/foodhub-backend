@@ -1,106 +1,42 @@
-import { prisma } from "../../lib/prisma";
-import { auth } from "../../lib/auth";
-import { Request, Response } from "express";
 import { Prisma } from "../../../generated/prisma/client";
-import { requireUser } from "../../lib/auth-user";
+import { prisma } from "../../lib/prisma";
 import { requireProvider } from "../../lib/require-provider";
 
 
-// export async function createMealService(req: Request, res: Response) {
-//     const session = await auth.api.getSession({
-//         headers: req.headers as any,
-//     });
-//     console.log(session)
-//     if (!session?.user) throw new Error("UNAUTHORIZED");
+export async function applyForProviderService(userId: string) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+  });
 
-//     const user = await prisma.user.findUnique({
-//         where: { id: session.user.id },
-//         select: { id: true, role: true },
-//     });
+  if (!user) {
+    throw new Error("UNAUTHORIZED");
+  }
 
-//     if (!user || user.role !== "PROVIDER") {
-//         throw new Error("FORBIDDEN");
-//     }
-
-//     const provider = await prisma.providerProfile.findUnique({
-//         where: { userId: user.id },
-//     });
-
-//     if (!provider) {
-//         throw new Error("PROVIDER_PROFILE_NOT_FOUND");
-//     }
-
-//     const { categoryId, name, description, price, imageUrl } = req.body;
-
-//     if (!categoryId || !name || price === undefined) {
-//         throw new Error("MISSING_REQUIRED_FIELDS");
-//     }
-
-//     const category = await prisma.category.findUnique({
-//         where: { id: categoryId },
-//     });
-
-//     if (!category) {
-//         throw new Error("CATEGORY_NOT_FOUND");
-//     }
-
-//     const meal = await prisma.meal.create({
-//         data: {
-//             providerId: provider.id,
-//             categoryId,
-//             name,
-//             description,
-//             price: new Prisma.Decimal(price), // ✅ CRITICAL FIX
-//             imageUrl,
-//         },
-//     });
-
-//     return meal;
-// }
-
-
-export async function applyForProviderService(req: any) {
-  const user = await requireUser(req);
-
-  // Prevent re-apply
   if (user.role === "PROVIDER") {
     throw new Error("ALREADY_PROVIDER");
   }
 
-  const existingProfile = await prisma.providerProfile.findUnique({
-    where: { userId: user.id },
-  });
+  const existingApplication =
+    await prisma.providerApplication.findUnique({
+      where: { userId },
+    });
 
-  if (existingProfile) {
-    throw new Error("PROFILE_ALREADY_EXISTS");
+  if (existingApplication) {
+    throw new Error("APPLICATION_ALREADY_EXISTS");
   }
 
-  // Transaction = safe
-  const [_, providerProfile] = await prisma.$transaction([
-    prisma.user.update({
-      where: { id: user.id },
-      data: { role: "PROVIDER" },
-    }),
-    prisma.providerProfile.create({
-      data: {
-        userId: user.id,
-        name: user.name,
-        address: "Pending provider setup",
-        description: null,
-        phone: null,
-      },
-    }),
-  ]);
+  const application = await prisma.providerApplication.create({
+    data: {
+      userId,
+    },
+  });
 
-  return providerProfile;
+  return application;
 }
 
 
 
 
-
-
-//  ____
 
 
 export async function createMealService(req: any) {

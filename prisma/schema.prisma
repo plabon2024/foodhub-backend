@@ -24,6 +24,8 @@ enum UserStatus {
   SUSPENDED
 }
 
+
+
 enum OrderStatus {
   PLACED
   PREPARING
@@ -31,13 +33,29 @@ enum OrderStatus {
   DELIVERED
   CANCELLED
 }
+enum ProviderApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+model ProviderApplication {
+  id        String                    @id @default(uuid())
+  userId    String                    @unique
+  status    ProviderApplicationStatus @default(PENDING)
+  createdAt DateTime                  @default(now())
+  updatedAt DateTime                  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("provider_applications")
+}
 
 model ProviderProfile {
   id          String  @id @default(uuid())
   userId      String  @unique
   name        String
   description String?
-  address     String
+  address     String?
   phone       String?
   isActive    Boolean @default(true)
 
@@ -188,20 +206,21 @@ model Verification {
 }
 
 model User {
-  id              String           @id
-  name            String
-  email           String
-  emailVerified   Boolean          @default(false)
-  image           String?
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  role            String?          @default("CUSTOMER")
-  status          String?          @default("ACTIVE")
-  sessions        Session[]
-  accounts        Account[]
-  providerProfile ProviderProfile?
-  orders          Order[]
-  reviews         Review[]
+  id                  String               @id
+  name                String
+  email               String
+  emailVerified       Boolean              @default(false)
+  image               String?
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  role                String?              @default("CUSTOMER")
+  status              String?              @default("ACTIVE")
+  sessions            Session[]
+  accounts            Account[]
+  providerProfile     ProviderProfile?
+  orders              Order[]
+  reviews             Review[]
+  providerApplication ProviderApplication?
 
   @@unique([email])
   @@map("user")
