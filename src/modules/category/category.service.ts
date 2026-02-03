@@ -3,7 +3,7 @@ import { requireUser } from "../../lib/auth-user";
 
 export async function createCategoryService(req: any) {
   const user = await requireUser(req);
-  if (user.role !== "PROVIDER") throw new Error("FORBIDDEN");
+  if (user.role !== "ADMIN") throw new Error("FORBIDDEN");
 
   const { name, description } = req.body;
   if (!name) throw new Error("NAME_REQUIRED");
@@ -14,6 +14,7 @@ export async function createCategoryService(req: any) {
 }
 
 export async function listCategoryService() {
+
   return prisma.category.findMany({
     orderBy: { createdAt: "desc" },
   });
@@ -21,9 +22,12 @@ export async function listCategoryService() {
 
 export async function updateCategoryService(req: any) {
   const user = await requireUser(req);
-  if (user.role !== "PROVIDER") throw new Error("FORBIDDEN");
+  if (user.role !== "ADMIN") throw new Error("FORBIDDEN");
 
   const { name, description } = req.body;
+  if (!name && !description) {
+    throw new Error("NOTHING_TO_UPDATE");
+  }
 
   return prisma.category.update({
     where: { id: req.params.id },
@@ -33,7 +37,7 @@ export async function updateCategoryService(req: any) {
 
 export async function deleteCategoryService(req: any) {
   const user = await requireUser(req);
-  if (user.role !== "PROVIDER") throw new Error("FORBIDDEN");
+  if (user.role !== "ADMIN") throw new Error("FORBIDDEN");
 
   return prisma.category.delete({
     where: { id: req.params.id },

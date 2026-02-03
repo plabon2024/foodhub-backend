@@ -1,5 +1,6 @@
 import { prisma } from "../../lib/prisma";
 import { requireAdmin } from "../../lib/require-admin";
+import { requireAuthUser } from "../../lib/require-auth-user";
 
 export async function getAllUsersService(req: any) {
   await requireAdmin(req);
@@ -28,15 +29,50 @@ export async function getAllUsersService(req: any) {
 export async function updateUserStatusService(req: any) {
   await requireAdmin(req);
 
+  const userId = req.params?.id;
   const { status } = req.body;
 
-  if (!["ACTIVE", "SUSPENDED"].includes(status)) {
+  if (!userId) {
+    throw new Error("USER_ID_REQUIRED");
+  }
+
+  const allowedStatuses = ["ACTIVE", "SUSPENDED"] as const;
+
+  if (!allowedStatuses.includes(status)) {
     throw new Error("INVALID_STATUS");
   }
 
-  return prisma.user.update({
-    where: { id: req.params.id },
-    data: { status },
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      role: true,
+    },
+  });
+
+  if (!user) {
+    throw new Error("USER_NOT_FOUND");
+  }
+
+  // 🔐 Atomic update
+  return prisma.$transaction(async (tx) => {
+    // 1️⃣ Update user status
+    const updatedUser = await tx.user.update({
+      where: { id: userId },
+      data: { status },
+    });
+
+    // 2️⃣ If PROVIDER → toggle providerProfile.isActive
+    if (user.role === "PROVIDER") {
+      await tx.providerProfile.update({
+        where: { userId },
+        data: {
+          isActive: status === "ACTIVE",
+        },
+      });
+    }
+
+    return updatedUser;
   });
 }
 
@@ -94,5 +130,28 @@ export async function approveProviderApplication(
 
   return profile;
 }
+
+
+export async function getAllProviderApplicationsService(req: any) {
+  await requireAdmin(req);
+
+  return prisma.providerApplication.findMany({
+    orderBy: { createdAt: "desc" },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          status: true,
+          role: true,
+          createdAt: true,
+        },
+      },
+    },
+  });
+}
+
+
 
 

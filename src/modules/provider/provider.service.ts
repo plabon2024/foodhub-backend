@@ -61,18 +61,65 @@ export async function createMealService(req: any) {
 }
 
 
+
 export async function updateMealService(req: any) {
   const provider = await requireProvider(req);
   const { id } = req.params;
 
-  return prisma.meal.updateMany({
+  if (!id) {
+    throw new Error("MEAL_ID_REQUIRED");
+  }
+
+  // Allow only safe fields
+  const {
+    name,
+    description,
+    price,
+    imageUrl,
+    isAvailable,
+    categoryId,
+    isFeatured,
+  } = req.body;
+
+  if (
+    name === undefined &&
+    description === undefined &&
+    price === undefined &&
+    imageUrl === undefined &&
+    isAvailable === undefined &&
+    categoryId === undefined &&
+    isFeatured === undefined
+  ) {
+    throw new Error("NO_FIELDS_TO_UPDATE");
+  }
+
+  // Ensure meal belongs to provider
+  const existingMeal = await prisma.meal.findFirst({
     where: {
       id,
       providerId: provider.id,
     },
-    data: req.body,
+  });
+
+  if (!existingMeal) {
+    throw new Error("MEAL_NOT_FOUND");
+  }
+
+  // Update meal
+  return prisma.meal.update({
+    where: { id },
+    data: {
+      ...(name !== undefined && { name }),
+      ...(description !== undefined && { description }),
+      ...(price !== undefined && { price }),
+      ...(imageUrl !== undefined && { imageUrl }),
+      ...(isAvailable !== undefined && { isAvailable }),
+      ...(categoryId !== undefined && { categoryId }),
+      ...(isFeatured !== undefined && { isFeatured }),
+    },
   });
 }
+
 
 export async function deleteMealService(req: any) {
   const provider = await requireProvider(req);

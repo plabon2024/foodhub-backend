@@ -3,9 +3,9 @@ import cors from "cors";
 
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth";
-import { providerRoutes } from "./modules/provider/provider.router";
-import { authRouter } from "./modules/auth/auth.router";
-import { mealRoutes } from "./modules/meals/meals.router";
+import { providerRoutes } from "./modules/provider/provider.routes";
+import { authRouter } from "./modules/auth/auth.routes";
+import { mealRoutes } from "./modules/meals/meals.routes";
 import { orderRoutes } from "./modules/orders/orders.routes";
 import { adminRoutes } from "./modules/admin/admin.routes";
 export const app: Application = express();

@@ -1,6 +1,6 @@
 
 import { Request, Response } from "express";
-import { browseMealsService, getMealDetailsService, getProviderWithMenuService, listProvidersService } from "./meals.service";
+import { browseMealsService, getMealDetailsService, getProviderWithMenuService, getStatsService, listCategoryService, listProvidersService } from "./meals.service";
 
 export async function browseMealsController(
   req: Request,
@@ -114,3 +114,33 @@ export async function getProviderWithMenuController(
     });
   }
 }
+
+
+export async function getStatsController(
+  req: Request,
+  res: Response
+) {
+  try {
+    const stats = await getStatsService(req);
+
+    return res.json({
+      success: true,
+      data: stats,
+    });
+  } catch (e: any) {
+    if (e.message === "UNAUTHORIZED") {
+      return res.status(401).json({ success: false, message: e.message });
+    }
+
+    if (e.message === "FORBIDDEN") {
+      return res.status(403).json({ success: false, message: e.message });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to load stats",
+    });
+  }
+}
+
+

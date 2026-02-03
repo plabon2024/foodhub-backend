@@ -65,13 +65,15 @@ export const auth = betterAuth({
     user: {
       create: {
         before: async (user) => {
-       
+          const allowedRole =
+            user.role === "PROVIDER" ? "PROVIDER" : "CUSTOMER";
           const [firstName = null, lastName = null] =
             user.name?.split(" ") ?? [];
 
           return {
             data: {
               ...user,
+              role: allowedRole,
               firstName,
               lastName,
             },

@@ -6,9 +6,8 @@
   "scripts": {
     "start": "tsx watch ./src/server.ts",
     "dev": "tsx watch ./src/server.ts",
-    "build": "prisma generate && tsc",
-    "postinstall": "prisma generate",
-    "vercel-build": "prisma generate && prisma migrate deploy && npm run build"
+    "build": "prisma generate && tsup src/server.ts --format esm --platform node --target node20 --outDir api --external pg-native",
+    "postinstall": "prisma generate"
   },
   "keywords": [],
   "author": "",
@@ -21,6 +20,7 @@
     "@types/nodemailer": "^7.0.5",
     "@types/pg": "^8.16.0",
     "prisma": "^7.3.0",
+    "tsup": "^8.5.1",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   },

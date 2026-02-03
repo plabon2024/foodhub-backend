@@ -1,4 +1,4 @@
-// modules/orders/order.router.ts
+
 import { Router } from "express";
 import { createOrderController, getMyOrdersController, getOrderDetailsController } from "./orders.controller";
 

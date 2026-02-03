@@ -1,7 +1,6 @@
 import { Router } from "express";
-import { approveProviderApplicationController, getAllUsersController, updateUserStatusController } from "./admin.controller";
-import { applyForProviderController } from "../provider/provider.controller";
-import { createCategoryController, deleteCategoryController, listCategoryController, updateCategoryController } from "../category/category.controller";
+import { createCategoryController, deleteCategoryController, updateCategoryController } from "../category/category.controller";
+import { approveProviderApplicationController, getAllProviderApplicationsController, getAllUsersController, updateUserStatusController } from "./admin.controller";
 
 
 const router = Router();
@@ -9,16 +8,16 @@ const router = Router();
 router.get("/users", getAllUsersController);
 router.patch("/users/:id", updateUserStatusController);
 
-// NEW
+// extra for  managing provider and categories 
 router.post(
   "/provider-applications/:applicationId/approve",
   approveProviderApplicationController
 );
+router.get("/provider-applications", getAllProviderApplicationsController);
 
-// extra for  managing provider and categories 
-router.post("/apply", applyForProviderController);
+
 router.post("/categories", createCategoryController);
-router.get("/categories", listCategoryController);
+
 router.put("/categories/:id", updateCategoryController);
 router.delete("/categories/:id", deleteCategoryController);
 

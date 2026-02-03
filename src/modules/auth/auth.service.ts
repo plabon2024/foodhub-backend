@@ -1,4 +1,5 @@
 import { auth } from "../../lib/auth";
+import { requireUser } from "../../lib/auth-user";
 import { prisma } from "../../lib/prisma";
 import { Request } from "express";
 
@@ -23,8 +24,65 @@ export async function getCurrentUserService(req: Request) {
       image: true,
       createdAt: true,
       providerProfile: true,
+      
     },
   });
 
   return user;
+}
+export async function updateProfileService(req: any) {
+  const user = await requireUser(req);
+
+  const {
+    name,
+    email,
+    description,
+    address,
+    phone,
+  } = req.body;
+
+  // Basic validation
+  if (!name && !email && !description && !address && !phone) {
+    throw new Error("NO_FIELDS_TO_UPDATE");
+  }
+
+  // Update User (CUSTOMER, PROVIDER, ADMIN)
+  if (name || email) {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        ...(name && { name }),
+        ...(email && { email }),
+      },
+    });
+  }
+
+  // Provider-only fields
+  if (user.role === "PROVIDER") {
+    const provider = await prisma.providerProfile.findUnique({
+      where: { userId: user.id },
+    });
+
+    if (!provider) {
+      throw new Error("PROVIDER_PROFILE_NOT_FOUND");
+    }
+
+    if (description || address || phone) {
+      await prisma.providerProfile.update({
+        where: { userId: user.id },
+        data: {
+          ...(description !== undefined && { description }),
+          ...(address !== undefined && { address }),
+          ...(phone !== undefined && { phone }),
+        },
+      });
+    }
+  }
+
+  return prisma.user.findUnique({
+    where: { id: user.id },
+    include: {
+      providerProfile: true,
+    },
+  });
 }
