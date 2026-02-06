@@ -24,7 +24,7 @@ export async function getCurrentUserService(req: Request) {
       image: true,
       createdAt: true,
       providerProfile: true,
-      
+
     },
   });
 
@@ -36,26 +36,35 @@ export async function updateProfileService(req: any) {
   const {
     name,
     email,
+    image,
     description,
     address,
     phone,
   } = req.body;
 
-  // Basic validation
-  if (!name && !email && !description && !address && !phone) {
+  if (
+    !name &&
+    !email &&
+    !image &&
+    !description &&
+    !address &&
+    !phone
+  ) {
     throw new Error("NO_FIELDS_TO_UPDATE");
   }
 
-  // Update User (CUSTOMER, PROVIDER, ADMIN)
-  if (name || email) {
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        ...(name && { name }),
-        ...(email && { email }),
-      },
-    });
-  }
+// User-level fields
+if (name || email || image) {
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      ...(name !== undefined && { name }),
+      ...(email !== undefined && { email }),
+      ...(image !== undefined && { image }),
+    },
+  });
+}
+
 
   // Provider-only fields
   if (user.role === "PROVIDER") {
