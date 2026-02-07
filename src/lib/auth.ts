@@ -18,8 +18,11 @@ export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
-
-  trustedOrigins: ["http://localhost:3000"],
+  trustedOrigins: [
+    "http://localhost:3000",
+    "https://foodhub-frontend-sepia.vercel.app",
+    ...(process.env.APP_URL ? [process.env.APP_URL] : []),
+  ],
 
   user: {
     additionalFields: {
@@ -81,7 +84,6 @@ export const auth = betterAuth({
         },
 
         after: async (user) => {
-
           if (user.role !== "PROVIDER") return;
           await prisma.providerProfile.upsert({
             where: { userId: user.id },
