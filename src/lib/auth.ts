@@ -96,5 +96,16 @@ export const auth = betterAuth({
         },
       },
     },
+  }, session: {
+    cookieCache: {
+      enabled: true,
+      maxAge: 5 * 60,
+    },
+    cookie: {
+      sameSite: "none", // ✅ REQUIRED FOR CROSS DOMAIN
+      secure: true,     // ✅ REQUIRED (HTTPS)
+    },
   },
+
+
 });

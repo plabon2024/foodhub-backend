@@ -1,13 +1,13 @@
-import express, { application, Application } from "express";
 import cors from "cors";
+import express, { Application } from "express";
 
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth";
-import { providerRoutes } from "./modules/provider/provider.routes";
+import { adminRoutes } from "./modules/admin/admin.routes";
 import { authRouter } from "./modules/auth/auth.routes";
 import { mealRoutes } from "./modules/meals/meals.routes";
 import { orderRoutes } from "./modules/orders/orders.routes";
-import { adminRoutes } from "./modules/admin/admin.routes";
+import { providerRoutes } from "./modules/provider/provider.routes";
 export const app: Application = express();
 const allowedOrigins = [
   "http://localhost:3000",
@@ -22,8 +22,11 @@ const corsOptions: cors.CorsOptions = {
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+  allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
+  exposedHeaders: ["Set-Cookie"],
+
 };
+
 
 
 app.use(cors(corsOptions));
